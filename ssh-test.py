@@ -2,8 +2,8 @@
 import subprocess
 import signal
 import os
+import sys
 import argparse
-
 
 class Alarm(Exception):
 	pass
@@ -12,10 +12,10 @@ def alarm_handler(signum, frame):
 	raise Alarm
 
 
-# global required
+# global
 AUTHTYPES = ['public key','password','host-based','keyboard']
 SSHDIR=os.getenv('HOME')+'/.ssh'
-SSHD='/sshd'
+SSHD_INPS='/sshd'
 SSH='/usr/bin/ssh'
 USER=os.getlogin()
 
@@ -63,20 +63,12 @@ def password_auth(host):
 	# password authentication with sshpass
 	# sshpass -f password ssh -q -o PreferredAuthentications=password ctf@localhost /bin/sh -c exit
 	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','StrictHostKeyChecking=no','-o','PreferredAuthentications=password','{0}@{1}'.format(USER,host),'/bin/sh','-c','exit']
-
 	# print(ARG)
-	proc = subprocess.Popen(ARG, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-	signal.signal(signal.SIGALRM, alarm_handler)
-	signal.alarm(5)	# in seconds
 
-	try:
-		proc.communicate()
-		signal.alarm(0)
-	except Alarm:
-		print('subprocess.Popen() takes too long. Return.')
-		return False
+	o,r = runproc(ARG,5)
 
-	if proc.returncode == 0:
+
+	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
 	else:
 		print('{0} failed, code={1}.'.format(AUTHNAME,proc.returncode))
@@ -84,33 +76,40 @@ def password_auth(host):
 		return False
 
 
-
 def publickey_auth(host):
 	SCP='/usr/bin/scp'
-	TMP1='/tmp/sshchk.'+MAGIC
+	UUID=open('/proc/sys/kernel/random/uuid','r').read()
+	TMP1='/tmp/sshchk.{0}'.format(UUID[:-1])	# remove '\n'
 	TMP2=TMP1+'.copy'
-	SSHD='sshd '
-	AUTHNAME='public key'
+	AUTHFILE=SSHDIR+'/authorized_keys'
+	AUTHNAME='public key authentication'
+
+	# check scp
+	if( not check_exe([SCP]) ):
+		return False
+	
+	# check all necessary files for read 
+	for f in [AUTHFILE]:
+		if(not os.path.isfile(f)) or (not os.access(f, os.R_OK)):
+			print('{0} is not available.'.format(f))
+			print('add public key to authorized_keys, like below example')
+			print('cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys')
+			return False
 
 	# Create the tmp file
 	try:
 		open(TMP1, 'w').close()
 
 		# scp -Bq user@localhost:file dst:file
-		ARG = [SCP,'-Bq',USER+'@localhost:'+TMP1,TMP2]
+		ARG = [SCP,'-o','PubkeyAuthentication=yes','-o','PreferredAuthentications=publickey','-o','StrictHostKeyChecking=no','-Bq','{0}@{1}:{2}'.format(USER,host,TMP1),TMP2]
+		#print ARG
 	
-		try:
-			proc.communicate()
-			signal.alarm(0)
-	        except Alarm:
-			print('subprocess.Popen() takes too long. Return.')
-			return False
-
-
-		if proc.returncode == 0:
-			print(AUTHNAME+' successful.')
+		o,r = runproc(ARG,5)
+	
+		if r == 0:
+			print('{0} successful.'.format(AUTHNAME))
 		else:
-			print(AUTHNAME+' failed.')
+			print('{0} failed, code={1}.'.format(AUTHNAME,r))
 			return False
 	finally:
 		try: 
@@ -119,7 +118,7 @@ def publickey_auth(host):
 		except:
 			pass
 
-	return False
+	return True
 
 
 def host_auth(host):
@@ -136,7 +135,6 @@ def main():
 	h=''
 	for a in range(len(AUTHTYPES)):
 		h += '{0}: {1}, '.format(a,AUTHTYPES[a])
-
 	h=h[:-2]+'.'
 
 	parser.add_argument('-a', type=int, dest='authtype', required=True, choices=range(len(AUTHTYPES)), help='the authentication type, {0}'.format(h))
@@ -145,17 +143,17 @@ def main():
 	args = parser.parse_args()
 	authtype, host = args.authtype, args.host
 
-	# check all directories
+	# check ssh directories
 	for d in [SSHDIR]:
 		if(not os.path.isdir(d)) or (not os.access(d, os.R_OK)):
 			print('{0} is not available.'.format(d))
-			return False
+			sys.exit(1)
 
 	# check if key files available under .ssh
 	f = os.listdir(SSHDIR)
 	if len(f) < 2:	# at least we need public key and private key
 		print('The public/private key files are not available.')
-		return False
+		sys.exit(1)
 
 # check if the host in known_hosts
 #	o,r = runproc([SSHKEYGEN,'-H','-F',host],5) 
@@ -168,22 +166,26 @@ def main():
 	# check if sshd is running
 	o,r = runproc(['ps','ax'],5) 
 
-	if SSHD not in o:
+	if SSHD_INPS not in o:
 		print('sshd is not running.')
-		return False
+		sys.exit(1)
 
 	if authtype == 0:
-		publickey_auth(host)
+		r=publickey_auth(host)
 	elif authtype == 1:
-		password_auth(host)
+		r=password_auth(host)
 	elif authtype == 2:
-		host_auth(host)
+		r=host_auth(host)
 	elif authtype == 3:
-		keyboard_auth(host)
+		r=keyboard_auth(host)
 	else:
-		print('Wrong authentication type.')	# should be detected earlier in parser.add_argument()
-		return False
+		print('Wrong authentication type.')	# should be caught earlier in parser.add_argument()
+		sys.exit(1)
+
+	if(r):
+		sys.exit(0)
+	else:	
+		sys.exit(1)
 	
 if __name__ == '__main__':
     main()
-
