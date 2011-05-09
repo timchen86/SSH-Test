@@ -4,46 +4,28 @@ import signal
 import os
 import argparse
 
-def main():
-	class Alarm(Exception):
-		pass
 
-	def alarm_handler(signum, frame):
-		raise Alarm
+class Alarm(Exception):
+	pass
 
-	AUTHTYPES = ['public key','password','host-based','keyboard']
+def alarm_handler(signum, frame):
+	raise Alarm
 
-	# arguments parsing
-	parser = argparse.ArgumentParser(description='SSH authentication test.')
 
-	# format the help string for authtype
-	h=''
-	for a in range(len(AUTHTYPES)):
-		h += '{0}: {1}, '.format(a,AUTHTYPES[a])
+# global required
+AUTHTYPES = ['public key','password','host-based','keyboard']
+SSHDIR=os.getenv('HOME')+'/.ssh'
+SSHD='/sshd'
+SSH='/usr/bin/ssh'
+USER=os.getlogin()
 
-	h=h[:-2]+'.'
-		
 
-	parser.add_argument('-a', type=int, dest='authtype', required=True, choices=range(len(AUTHTYPES)), help='the authentication type, {0}'.format(h))
-	parser.add_argument('host', type=str, metavar='HOST', default='localhost', nargs='?', help='the host to perform the SSH test, default: localhost')
-
-	args = parser.parse_args()
-
-	print(args.authtype)
-	print(args.host)
-
-	#
+def password_auth(host):
 	SSHPASS='/usr/bin/sshpass'
 	SSHKEYGEN='/usr/bin/ssh-keygen'
 	SSHKEYSCAN='/usr/bin/ssh-keyscan'
-	SSHDIR=os.getenv('HOME')+'/.ssh'
 	PASSFILE=os.getcwd()+'/password'	# XXX: insecure
 	KNOWNHOSTS=SSHDIR+'/known_hosts'
-	SSHD='/sshd'
-	USER=os.getlogin()
-	AUTHNAME='SSH password authentication'
-	HOSTNAME='localhost'
-
 
 	# check all necessary executables
 	for f in [SSHPASS,SSHKEYGEN,SSHKEYSCAN]:
@@ -70,7 +52,7 @@ def main():
 		return False
 
 	# check if the host in known_hosts
-	proc = subprocess.Popen([SSHKEYGEN,'-H','-F',HOSTNAME], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	proc = subprocess.Popen([SSHKEYGEN,'-H','-F',host], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	signal.signal(signal.SIGALRM, alarm_handler)
 	signal.alarm(5)	# in seconds
 	
@@ -83,9 +65,9 @@ def main():
 		print('subprocess.Popen() takes too long. Return.')
 		return False
 
-	if HOSTNAME not in output:
-		print('Host {0} is not in {1}.'.format(HOSTNAME,KNOWNHOSTS))
-		print('Run: {0} -H -t rsa {1} >> {2}'.format(SSHKEYSCAN,HOSTNAME,KNOWNHOSTS))
+	if host not in output:
+		print('Host {0} is not in {1}.'.format(host,KNOWNHOSTS))
+		print('Run: {0} -H -t rsa {1} >> {2}'.format(SSHKEYSCAN,host,KNOWNHOSTS))
 		return False
 
 	# check if sshd is running
@@ -108,9 +90,9 @@ def main():
 
 	# password authentication with sshpass
 	# sshpass -f password ssh -q -o PreferredAuthentications=password ctf@localhost /bin/sh -c exit
-	ARG=[SSHPASS,'-f',PASSFILE,'ssh','-q','-o','PreferredAuthentications=password',USER+'@localhost','/bin/sh','-c','exit']
+	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','PreferredAuthentications=password','{0}@{1}'.format(USER,host),'/bin/sh','-c','exit']
 
-	print(ARG)
+	# print(ARG)
 	proc = subprocess.Popen(ARG, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 	signal.signal(signal.SIGALRM, alarm_handler)
 	signal.alarm(5)	# in seconds
@@ -125,9 +107,29 @@ def main():
 	if proc.returncode == 0:
 		print(AUTHNAME+' successful.')
 	else:
-		print('{0} failed, code={1}.'.format(AUTHNAME,proc.returncode))
+		print('password authentication failed, code={0}.'.format(proc.returncode))
+		print('\'man sshpass\' for return code.')
 		return False
 
+def main():
+	# arguments parsing
+	parser = argparse.ArgumentParser(description='SSH authentication test.')
+
+	# format the help string for authtype
+	h=''
+	for a in range(len(AUTHTYPES)):
+		h += '{0}: {1}, '.format(a,AUTHTYPES[a])
+
+	h=h[:-2]+'.'
+
+	parser.add_argument('-a', type=int, dest='authtype', required=True, choices=range(len(AUTHTYPES)), help='the authentication type, {0}'.format(h))
+	parser.add_argument('host', type=str, metavar='HOST', default='localhost', nargs='?', help='the host to perform the SSH test, default: localhost')
+
+	args = parser.parse_args()
+	authtype, host = args.authtype, args.host
+
+
+	password_auth(host)
 
 
 if __name__ == '__main__':
