@@ -11,23 +11,26 @@ def main():
 	def alarm_handler(signum, frame):
 		raise Alarm
 
-
-
 	AUTHTYPES = ['public key','password','host-based','keyboard']
-
 
 	# arguments parsing
 	parser = argparse.ArgumentParser(description='SSH authentication test.')
+
+	# format the help string for authtype
 	h=''
 	for a in range(len(AUTHTYPES)):
 		h += '{0}: {1}, '.format(a,AUTHTYPES[a])
 
 	h=h[:-2]+'.'
 		
-	parser.add_argument('-a', type=int, dest='authtype', help='the authentication type, {0}'.format(h))
-	parser.add_argument('host', metavar='HOST', default='localhost', help='the host to perform the SSH test, default: localhost')
+
+	parser.add_argument('-a', type=int, dest='authtype', required=True, choices=range(len(AUTHTYPES)), help='the authentication type, {0}'.format(h))
+	parser.add_argument('host', type=str, metavar='HOST', default='localhost', nargs='?', help='the host to perform the SSH test, default: localhost')
 
 	args = parser.parse_args()
+
+	print(args.authtype)
+	print(args.host)
 
 	#
 	SSHPASS='/usr/bin/sshpass'
