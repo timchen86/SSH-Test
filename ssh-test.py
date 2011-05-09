@@ -26,6 +26,7 @@ def password_auth(host):
 	SSHKEYSCAN='/usr/bin/ssh-keyscan'
 	PASSFILE=os.getcwd()+'/password'	# XXX: insecure
 	KNOWNHOSTS=SSHDIR+'/known_hosts'
+	AUTHNAME='password authentication'
 
 	# check all necessary executables
 	for f in [SSHPASS,SSHKEYGEN,SSHKEYSCAN]:
@@ -105,9 +106,9 @@ def password_auth(host):
 		return False
 
 	if proc.returncode == 0:
-		print(AUTHNAME+' successful.')
+		print('{0} successful.'.format(AUTHNAME))
 	else:
-		print('password authentication failed, code={0}.'.format(proc.returncode))
+		print('{0} failed, code={1}.'.format(AUTHNAME,proc.returncode))
 		print('\'man sshpass\' for return code.')
 		return False
 
