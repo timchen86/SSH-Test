@@ -11,7 +11,6 @@ class Alarm(Exception):
 def alarm_handler(signum, frame):
 	raise Alarm
 
-
 # global
 AUTHTYPES = ['public key','password','host-based']
 SSHDIR=os.getenv('HOME')+'/.ssh'
@@ -121,8 +120,21 @@ def publickey_auth(host):
 	return True
 
 
-def host_auth(host):
-	return False
+
+def hostbased_auth(host):
+	AUTHNAME='host-based authentication'
+	ARG=[SSH,'-q','-o','StrictHostKeyChecking=no','-o','PreferredAuthentications=hostbased',host,'/bin/sh','-c','exit']
+	# print(ARG)
+
+	o,r = runproc(ARG,5)
+
+	if r == 0:
+		print('{0} successful.'.format(AUTHNAME))
+	else:
+		print('{0} failed, code={1}.'.format(AUTHNAME,r))
+		return False
+
+
 
 def main():
 	# arguments parsing
@@ -135,10 +147,13 @@ def main():
 	h=h[:-2]+'.'
 
 	parser.add_argument('-a', type=int, dest='authtype', required=True, choices=range(len(AUTHTYPES)), help='the authentication type, {0}'.format(h))
-	parser.add_argument('host', type=str, metavar='HOST', default='localhost', nargs='?', help='the host to perform the SSH test, default: localhost')
+	parser.add_argument('host', type=str, metavar='HOST', default='localhost.localdomain', nargs='?', \
+	help='the host to perform the SSH test, for host-based authenticaion, the host name must be in FQDN. default: localhost.localdomain')
 
 	args = parser.parse_args()
 	authtype, host = args.authtype, args.host
+	
+	print('host is {0}'.format(host))
 
 	# check ssh directories
 	for d in [SSHDIR]:
@@ -164,7 +179,7 @@ def main():
 	elif authtype == 1:
 		r=password_auth(host)
 	elif authtype == 2:
-		r=host_auth(host)
+		r=hostbased_auth(host)
 	else:
 		print('Wrong authentication type.')	# should be caught earlier in parser.add_argument()
 		sys.exit(1)
