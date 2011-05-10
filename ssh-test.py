@@ -13,7 +13,6 @@ def alarm_handler(signum, frame):
 
 # global
 AUTHTYPES = ['public key','password','host-based']
-SSHDIR=os.getenv('HOME')+'/.ssh'
 SSHD_INPS='/sshd'
 SSH='/usr/bin/ssh'
 USER=os.getlogin()
@@ -134,18 +133,6 @@ def main():
 	authtype, host = args.authtype, args.host
 	
 	print('host is {0}'.format(host))
-
-	# check ssh directories
-	for d in [SSHDIR]:
-		if(not os.path.isdir(d)) or (not os.access(d, os.R_OK)):
-			print('{0} is not available.'.format(d))
-			sys.exit(1)
-
-	# check if key files available under .ssh
-	f = os.listdir(SSHDIR)
-	if len(f) < 2:	# at least we need public key and private key
-		print('The public/private key files are not available.')
-		sys.exit(1)
 
 	# check if sshd is running
 	o,r = runproc(['ps','ax'],5) 
