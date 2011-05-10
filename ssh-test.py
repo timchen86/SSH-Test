@@ -13,7 +13,7 @@ def alarm_handler(signum, frame):
 
 
 # global
-AUTHTYPES = ['public key','password','host-based','keyboard']
+AUTHTYPES = ['public key','password','host-based']
 SSHDIR=os.getenv('HOME')+'/.ssh'
 SSHD_INPS='/sshd'
 SSH='/usr/bin/ssh'
@@ -71,7 +71,7 @@ def password_auth(host):
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
 	else:
-		print('{0} failed, code={1}.'.format(AUTHNAME,proc.returncode))
+		print('{0} failed, code={1}.'.format(AUTHNAME,r))
 		print('\'man sshpass\' for return code.')
 		return False
 
@@ -124,9 +124,6 @@ def publickey_auth(host):
 def host_auth(host):
 	return False
 
-def keyboard_auth(host):
-	return False
-	
 def main():
 	# arguments parsing
 	parser = argparse.ArgumentParser(description='SSH authentication test.')
@@ -176,8 +173,6 @@ def main():
 		r=password_auth(host)
 	elif authtype == 2:
 		r=host_auth(host)
-	elif authtype == 3:
-		r=keyboard_auth(host)
 	else:
 		print('Wrong authentication type.')	# should be caught earlier in parser.add_argument()
 		sys.exit(1)
