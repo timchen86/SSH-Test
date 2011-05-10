@@ -52,7 +52,7 @@ def password_auth(user,host):
 	# check all necessary files for read 
 	for f in [PASSFILE]:
 		if(not os.path.isfile(f)) or (not os.access(f, os.R_OK)):
-			print('{0} is not available.'.format(f))
+			print('{0} is not available. Store the user password in this file'.format(f))
 			return False
 
 	# password authentication with sshpass
