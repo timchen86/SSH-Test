@@ -15,10 +15,31 @@ optional arguments:
   -a {0,1,2}  the authentication type, 0: public key, 1: password, 2: host-
               based.
 
-
 Manual test case:
 
-public key authenticaion:
-	Run scp command 
+public key authentication:
+	Run ssh command to do the test
+	Require: ssh
 	Steps to test:
-		1) run ssh command: 
+		1) run ssh command: ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=publickey HOST /bin/sh -c exit
+		2) check the return code: echo $?
+	Expected result:
+		Test ok on return code = 0, otherwise test failed.		
+
+host-based authentication:
+	Run ssh command to do the test
+	Require: ssh
+	Steps to test:
+		1) run ssh command: ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=hostbased HOST /bin/sh -c exit
+		2) check the return code: echo $?
+	Expected result:
+		Test ok on return code = 0, otherwise test failed.
+
+password authentication:
+	Use sshpass tool to do the test 
+	Require: sshpass, ssh, user password stored in the PASSWORDFILE.
+	Steps to test:
+		1) run sshpass command: sshpass -f PASSWORDFILE ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=password user@localhost
+		2) check the return code: echo $?
+    Expected result:
+        Test ok on return code = 0, otherwise test failed.
