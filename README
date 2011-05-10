@@ -30,7 +30,7 @@ public key authentication:
 	Steps to test:
 		1) run ssh command: 
 			ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=publickey \
-			HOST /bin/sh -c exit
+			USER@HOST /bin/sh -c exit
 		2) check the return code: echo $?
 	Expected result:
 		Test ok on return code = 0, otherwise test failed.		
