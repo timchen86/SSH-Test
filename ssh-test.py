@@ -94,9 +94,9 @@ def publickey_auth(host):
 	for f in [AUTHFILE]:
 		if(not os.path.isfile(f)) or (not os.access(f, os.R_OK)):
 			print('{0} is not available.'.format(f))
-			print('add public key to authorized_keys, like below example')
+			print('Test may be failed due to authorized_keys file, test continues.')
+			print('you may add public key to authorized_keys, like below example')
 			print('cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys')
-			return False
 
 	# Create the tmp file
 	try:
