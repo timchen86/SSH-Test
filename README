@@ -26,7 +26,7 @@ Manual test cases:
 
 public key authentication:
 	Run ssh command to do the test
-	Require: ssh
+	Require: ssh, store user public key in authorized_keys
 	Steps to test:
 		1) run ssh command: 
 			ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=publickey \
@@ -52,7 +52,7 @@ password authentication:
 	Steps to test:
 		1) run sshpass command: 
 			sshpass -f PASSWORDFILE ssh -o StrictHostKeyChecking=no \
-			-o PreferredAuthentications=password USER@HOST
+			-o PreferredAuthentications=password USER@HOST /bin/sh -c exit
 		2) check the return code: echo $?
     Expected result:
         Test ok on return code = 0, otherwise test failed.
