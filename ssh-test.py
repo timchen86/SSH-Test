@@ -47,7 +47,7 @@ def password_auth(host):
 	SSHPASS='/usr/bin/sshpass'
 	SSHKEYGEN='/usr/bin/ssh-keygen'
 	SSHKEYSCAN='/usr/bin/ssh-keyscan'
-	PASSFILE=os.getcwd()+'/password'	# XXX: insecure
+	PASSFILE=os.getcwd()+'/password'
 	AUTHNAME='password authentication'
 
 	# check all necessary executables
@@ -66,11 +66,9 @@ def password_auth(host):
 	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','StrictHostKeyChecking=no',\
 				       '-o','PreferredAuthentications=password',\
 				       '{0}@{1}'.format(USER,host),'/bin/sh','-c','exit']
-
 	# print(ARG)
 
 	o,r = runproc(ARG,5)
-
 
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
