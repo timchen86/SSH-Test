@@ -1,7 +1,12 @@
 SSH-Test by Tim Chen <tim.chen.86@gmail.com> Date: Wed May 11 02:39:31 CST 2011
 -------------------------------------------------------------------------------
-Tools to test the SSH authentication.
+Tools to test for the following the SSH authentications.
 
+public key authentication
+host-based authentication
+password authentication
+
+-------------------------------------------------------------------------------
 usage: ssh-test.py [-h] -a {0,1,2} [HOST]
 
 SSH authentication test.
@@ -15,6 +20,8 @@ optional arguments:
   -a {0,1,2}  the authentication type, 0: public key, 1: password, 2: host-
               based.
 
+
+-------------------------------------------------------------------------------
 Manual test cases:
 
 public key authentication:
