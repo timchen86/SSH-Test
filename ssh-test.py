@@ -14,7 +14,6 @@ def alarm_handler(signum, frame):
 # global
 AUTHTYPES = ['public key','password','host-based']
 SSH='/usr/bin/ssh'
-USER=os.getlogin()
 
 def runproc(command,seconds):
 	proc = subprocess.Popen(command, stdout=subprocess.PIPE,\
@@ -41,7 +40,7 @@ def check_exe(files):
 			return False
 	return True
 
-def password_auth(host):
+def password_auth(user,host):
 	SSHPASS='/usr/bin/sshpass'
 	PASSFILE=os.getcwd()+'/password'
 	AUTHNAME='password authentication'
@@ -61,7 +60,7 @@ def password_auth(host):
         # PreferredAuthentications=password ctf@localhost /bin/sh -c exit
 	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','StrictHostKeyChecking=no',\
 				       '-o','PreferredAuthentications=password',\
-				       '{0}@{1}'.format(USER,host),'/bin/sh','-c','exit']
+				       '{0}@{1}'.format(user,host),'/bin/sh','-c','exit']
 	# print(ARG)
 
 	o,r = runproc(ARG,5)
@@ -74,11 +73,11 @@ def password_auth(host):
 		return False
 
 
-def publickey_auth(host):
+def publickey_auth(user,host):
 	AUTHNAME='public key authentication'
 	ARG=[SSH,'-q','-o','StrictHostKeyChecking=no',\
                  '-o','PreferredAuthentications=publickey',\
-                 host,'/bin/sh','-c','exit']
+                 '{0}@{1}'.format(user,host),'/bin/sh','-c','exit']
 	# print(ARG)
 
 	o,r = runproc(ARG,5)
@@ -121,20 +120,24 @@ def main():
                             choices=range(len(AUTHTYPES)),\
                             help='the authentication type, {0}'.format(h))
 
+	parser.add_argument('user', type=str, metavar='USER', \
+                            help='the user for public key and password authentication.')
+
 	parser.add_argument('host', type=str, metavar='HOST',\
                             default='localhost.localdomain', nargs='?', \
                             help='the host to perform the SSH test, for host-based authenticaion, \
                             the host name must be in FQDN. default: localhost.localdomain')
 
 	args = parser.parse_args()
-	authtype, host = args.authtype, args.host
+	authtype, user, host = args.authtype, args.user, args.host
 	
+	print('user is {0}'.format(user))
 	print('host is {0}'.format(host))
 
 	if authtype == 0:
-		r=publickey_auth(host)
+		r=publickey_auth(user,host)
 	elif authtype == 1:
-		r=password_auth(host)
+		r=password_auth(user,host)
 	elif authtype == 2:
 		r=hostbased_auth(host)
 	else:
