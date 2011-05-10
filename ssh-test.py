@@ -152,14 +152,6 @@ def main():
 		print('The public/private key files are not available.')
 		sys.exit(1)
 
-# check if the host in known_hosts
-#	o,r = runproc([SSHKEYGEN,'-H','-F',host],5) 
-
-#	if host not in o:
-#		print('Host {0} is not in {1}.'.format(host,KNOWNHOSTS))
-#		print('Run: {0} -H -t rsa {1} >> {2}'.format(SSHKEYSCAN,host,KNOWNHOSTS))
-#		return False
-
 	# check if sshd is running
 	o,r = runproc(['ps','ax'],5) 
 
