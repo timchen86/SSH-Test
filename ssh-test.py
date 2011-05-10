@@ -13,7 +13,6 @@ def alarm_handler(signum, frame):
 
 # global
 AUTHTYPES = ['public key','password','host-based']
-SSHD_INPS='/sshd'
 SSH='/usr/bin/ssh'
 USER=os.getlogin()
 
@@ -131,13 +130,6 @@ def main():
 	authtype, host = args.authtype, args.host
 	
 	print('host is {0}'.format(host))
-
-	# check if sshd is running
-	o,r = runproc(['ps','ax'],5) 
-
-	if SSHD_INPS not in o:
-		print('sshd is not running.')
-		sys.exit(1)
 
 	if authtype == 0:
 		r=publickey_auth(host)
