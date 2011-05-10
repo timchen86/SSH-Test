@@ -44,13 +44,11 @@ def check_exe(files):
 
 def password_auth(host):
 	SSHPASS='/usr/bin/sshpass'
-	SSHKEYGEN='/usr/bin/ssh-keygen'
-	SSHKEYSCAN='/usr/bin/ssh-keyscan'
 	PASSFILE=os.getcwd()+'/password'
 	AUTHNAME='password authentication'
 
 	# check all necessary executables
-	if( not check_exe([SSHPASS,SSHKEYGEN,SSHKEYSCAN]) ):
+	if( not check_exe([SSHPASS]) ):
 		return False
 	
 	# check all necessary files for read 
