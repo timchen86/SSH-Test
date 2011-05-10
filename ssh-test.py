@@ -79,52 +79,19 @@ def password_auth(host):
 
 
 def publickey_auth(host):
-	SCP='/usr/bin/scp'
-	UUID=open('/proc/sys/kernel/random/uuid','r').read()
-	TMP1='/tmp/sshchk.{0}'.format(UUID[:-1])	# remove '\n'
-	TMP2=TMP1+'.copy'
-	AUTHFILE=SSHDIR+'/authorized_keys'
 	AUTHNAME='public key authentication'
+	ARG=[SSH,'-q','-o','StrictHostKeyChecking=no',\
+                 '-o','PreferredAuthentications=publickey',\
+                 host,'/bin/sh','-c','exit']
+	# print(ARG)
 
-	# check scp
-	if( not check_exe([SCP]) ):
+	o,r = runproc(ARG,5)
+
+	if r == 0:
+		print('{0} successful.'.format(AUTHNAME))
+	else:
+		print('{0} failed, code={1}.'.format(AUTHNAME,r))
 		return False
-	
-	# check all necessary files for read 
-	for f in [AUTHFILE]:
-		if(not os.path.isfile(f)) or (not os.access(f, os.R_OK)):
-			print('{0} is not available.'.format(f))
-			print('Test may be failed due to authorized_keys file, test continues.')
-			print('you may add public key to authorized_keys, like below example')
-			print('cat ~/.ssh/id_rsa.pub >> ~/.ssh/authorized_keys')
-
-	# Create the tmp file
-	try:
-		open(TMP1, 'w').close()
-
-		# scp -Bq user@localhost:file dst:file
-		ARG = [SCP,'-o','PubkeyAuthentication=yes',\
-                           '-o','PreferredAuthentications=publickey',\
-	                   '-o','StrictHostKeyChecking=no',\
-               		   '-Bq','{0}@{1}:{2}'.format(USER,host,TMP1),TMP2]
-		#print ARG
-	
-		o,r = runproc(ARG,5)
-	
-		if r == 0:
-			print('{0} successful.'.format(AUTHNAME))
-		else:
-			print('{0} failed, code={1}.'.format(AUTHNAME,r))
-			return False
-	finally:
-		try: 
-			os.remove(TMP1)
-			os.remove(TMP2)
-		except:
-			pass
-
-	return True
-
 
 
 def hostbased_auth(host):
