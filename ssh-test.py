@@ -19,7 +19,8 @@ SSH='/usr/bin/ssh'
 USER=os.getlogin()
 
 def runproc(command,seconds):
-	proc = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	proc = subprocess.Popen(command, stdout=subprocess.PIPE,\
+                                         stderr=subprocess.PIPE)
 	signal.signal(signal.SIGALRM, alarm_handler)
 	signal.alarm(seconds)
 	
@@ -60,8 +61,12 @@ def password_auth(host):
 			return False
 
 	# password authentication with sshpass
-	# sshpass -f password ssh -q -o PreferredAuthentications=password ctf@localhost /bin/sh -c exit
-	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','StrictHostKeyChecking=no','-o','PreferredAuthentications=password','{0}@{1}'.format(USER,host),'/bin/sh','-c','exit']
+	# sshpass -f password ssh -q -o \
+        # PreferredAuthentications=password ctf@localhost /bin/sh -c exit
+	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','StrictHostKeyChecking=no',\
+				       '-o','PreferredAuthentications=password',\
+				       '{0}@{1}'.format(USER,host),'/bin/sh','-c','exit']
+
 	# print(ARG)
 
 	o,r = runproc(ARG,5)
@@ -100,7 +105,10 @@ def publickey_auth(host):
 		open(TMP1, 'w').close()
 
 		# scp -Bq user@localhost:file dst:file
-		ARG = [SCP,'-o','PubkeyAuthentication=yes','-o','PreferredAuthentications=publickey','-o','StrictHostKeyChecking=no','-Bq','{0}@{1}:{2}'.format(USER,host,TMP1),TMP2]
+		ARG = [SCP,'-o','PubkeyAuthentication=yes',\
+                           '-o','PreferredAuthentications=publickey',\
+	                   '-o','StrictHostKeyChecking=no',\
+               		   '-Bq','{0}@{1}:{2}'.format(USER,host,TMP1),TMP2]
 		#print ARG
 	
 		o,r = runproc(ARG,5)
@@ -123,7 +131,9 @@ def publickey_auth(host):
 
 def hostbased_auth(host):
 	AUTHNAME='host-based authentication'
-	ARG=[SSH,'-q','-o','StrictHostKeyChecking=no','-o','PreferredAuthentications=hostbased',host,'/bin/sh','-c','exit']
+	ARG=[SSH,'-q','-o','StrictHostKeyChecking=no',\
+                 '-o','PreferredAuthentications=hostbased',\
+                 host,'/bin/sh','-c','exit']
 	# print(ARG)
 
 	o,r = runproc(ARG,5)
@@ -146,9 +156,14 @@ def main():
 		h += '{0}: {1}, '.format(a,AUTHTYPES[a])
 	h=h[:-2]+'.'
 
-	parser.add_argument('-a', type=int, dest='authtype', required=True, choices=range(len(AUTHTYPES)), help='the authentication type, {0}'.format(h))
-	parser.add_argument('host', type=str, metavar='HOST', default='localhost.localdomain', nargs='?', \
-	help='the host to perform the SSH test, for host-based authenticaion, the host name must be in FQDN. default: localhost.localdomain')
+	parser.add_argument('-a', type=int, dest='authtype', required=True,\
+                            choices=range(len(AUTHTYPES)),\
+                            help='the authentication type, {0}'.format(h))
+
+	parser.add_argument('host', type=str, metavar='HOST',\
+                            default='localhost.localdomain', nargs='?', \
+                            help='the host to perform the SSH test, for host-based authenticaion, \
+                            the host name must be in FQDN. default: localhost.localdomain')
 
 	args = parser.parse_args()
 	authtype, host = args.authtype, args.host
@@ -181,7 +196,8 @@ def main():
 	elif authtype == 2:
 		r=hostbased_auth(host)
 	else:
-		print('Wrong authentication type.')	# should be caught earlier in parser.add_argument()
+		# should be caught earlier in parser.add_argument()
+		print('Wrong authentication type.')			
 		sys.exit(1)
 
 	if(r):
