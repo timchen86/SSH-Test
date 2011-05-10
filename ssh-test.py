@@ -27,8 +27,8 @@ def runproc(command,seconds):
 		proc.communicate()
 		signal.alarm(0)
 	except Alarm:
-		print('subprocess.Popen() takes too long. Return.')
-		return False
+		print('subprocess.Popen() takes too long. Exit.')
+		sys.exit(1)
 	
 	return output, proc.returncode
 
