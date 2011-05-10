@@ -54,5 +54,5 @@ password authentication:
 			sshpass -f PASSWORDFILE ssh -o StrictHostKeyChecking=no \
 			-o PreferredAuthentications=password USER@HOST /bin/sh -c exit
 		2) check the return code: echo $?
-    Expected result:
+	Expected result:
         Test ok on return code = 0, otherwise test failed.
