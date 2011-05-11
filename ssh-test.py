@@ -57,7 +57,7 @@ def password_auth(user,host):
 
 	# password authentication with sshpass
 	# sshpass -f password ssh -q -o \
-        # PreferredAuthentications=password ctf@localhost /bin/sh -c exit
+	# PreferredAuthentications=password ctf@localhost /bin/sh -c exit
 	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','StrictHostKeyChecking=no',\
 				       '-o','PreferredAuthentications=password',\
 				       '{0}@{1}'.format(user,host),'/bin/sh','-c','exit']
