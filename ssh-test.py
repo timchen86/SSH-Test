@@ -27,7 +27,7 @@ class Watchdog(Exception):
 		return 'The code you executed took more than {0} to complete'.format(self.time)
 
 
-def runproc(command,seconds):
+def runproc(command):
 	proc = subprocess.Popen(command, stdout=subprocess.PIPE,\
                                          stderr=subprocess.PIPE)
 	output = proc.stdout.read()
@@ -66,7 +66,7 @@ def password_auth(user,host):
 
 	try:
 		with Watchdog(3):
-			o,r = runproc(ARG,5)
+			o,r = runproc(ARG)
 	except Watchdog:
 		print('runproc timeout!.')
 		return False
@@ -87,7 +87,7 @@ def publickey_auth(user,host):
 
 	try:
 		with Watchdog(3):
-			o,r = runproc(ARG,5)
+			o,r = runproc(ARG)
 	except Watchdog:
 		print('runproc timeout!.')
 		return False
@@ -107,7 +107,7 @@ def hostbased_auth(host):
 
 	try:
 		with Watchdog(3):
-			o,r = runproc(ARG,5)
+			o,r = runproc(ARG)
 	except Watchdog:
 		print('runproc timeout!.')
 		return False
@@ -145,6 +145,7 @@ def main():
 	args = parser.parse_args()
 	authtype, user, host = args.authtype, args.user, args.host
 	
+	print('Test for {0} authentication.'.format(AUTHTYPES[authtype]))
 	print('user is {0}'.format(user))
 	print('host is {0}'.format(host))
 
