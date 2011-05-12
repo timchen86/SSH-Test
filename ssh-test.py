@@ -5,30 +5,33 @@ import os
 import sys
 import argparse
 
-class Alarm(Exception):
-	pass
-
-def alarm_handler(signum, frame):
-	raise Alarm
-
 # global
 AUTHTYPES = ['public key','password','host-based']
 SSH='/usr/bin/ssh'
 
+class Watchdog(Exception):
+	def __init__(self, time=5):
+		self.time = time
+  
+	def __enter__(self):
+		signal.signal(signal.SIGALRM, self.handler)
+		signal.alarm(self.time)
+		  
+	def __exit__(self, type, value, traceback):
+		signal.alarm(0)
+    
+	def handler(self, signum, frame):
+		raise self
+  
+	def __str__(self):
+		return 'The code you executed took more than {0} to complete'.format(self.time)
+
+
 def runproc(command,seconds):
 	proc = subprocess.Popen(command, stdout=subprocess.PIPE,\
                                          stderr=subprocess.PIPE)
-	signal.signal(signal.SIGALRM, alarm_handler)
-	signal.alarm(seconds)
-	
 	output = proc.stdout.read()
-
-	try:
-		proc.communicate()
-		signal.alarm(0)
-	except Alarm:
-		print('subprocess.Popen() takes too long. Exit.')
-		sys.exit(1)
+	proc.communicate()
 	
 	return output, proc.returncode
 
@@ -55,15 +58,18 @@ def password_auth(user,host):
 			print('{0} is not available. Store the user password in this file'.format(f))
 			return False
 
-	# password authentication with sshpass
 	# sshpass -f password ssh -q -o \
 	# PreferredAuthentications=password ctf@localhost /bin/sh -c exit
 	ARG=[SSHPASS,'-f',PASSFILE,SSH,'-q','-o','StrictHostKeyChecking=no',\
 				       '-o','PreferredAuthentications=password',\
 				       '{0}@{1}'.format(user,host),'/bin/sh','-c','exit']
-	# print(ARG)
 
-	o,r = runproc(ARG,5)
+	try:
+		with Watchdog(3):
+			o,r = runproc(ARG,5)
+	except Watchdog:
+		print('runproc timeout!.')
+		return False
 
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
@@ -76,11 +82,15 @@ def password_auth(user,host):
 def publickey_auth(user,host):
 	AUTHNAME='public key authentication'
 	ARG=[SSH,'-q','-o','StrictHostKeyChecking=no',\
-                 '-o','PreferredAuthentications=publickey',\
-                 '{0}@{1}'.format(user,host),'/bin/sh','-c','exit']
-	# print(ARG)
+                  '-o','PreferredAuthentications=publickey',\
+                  '{0}@{1}'.format(user,host),'/bin/sh','-c','exit']
 
-	o,r = runproc(ARG,5)
+	try:
+		with Watchdog(3):
+			o,r = runproc(ARG,5)
+	except Watchdog:
+		print('runproc timeout!.')
+		return False
 
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
@@ -92,11 +102,15 @@ def publickey_auth(user,host):
 def hostbased_auth(host):
 	AUTHNAME='host-based authentication'
 	ARG=[SSH,'-q','-o','StrictHostKeyChecking=no',\
-                 '-o','PreferredAuthentications=hostbased',\
+                  '-o','PreferredAuthentications=hostbased',\
                  host,'/bin/sh','-c','exit']
-	# print(ARG)
 
-	o,r = runproc(ARG,5)
+	try:
+		with Watchdog(3):
+			o,r = runproc(ARG,5)
+	except Watchdog:
+		print('runproc timeout!.')
+		return False
 
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
