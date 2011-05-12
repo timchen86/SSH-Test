@@ -55,4 +55,4 @@ password authentication:
 			-o PreferredAuthentications=password USER@HOST /bin/sh -c exit
 		2) check the return code: echo $?
 	Expected result:
-        Test ok on return code = 0, otherwise test failed.
+		Test ok on return code = 0, otherwise test failed.
