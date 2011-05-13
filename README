@@ -23,7 +23,9 @@ Manual test cases:
 
 public key authentication:
 	Run ssh command to do the test
-	Require: ssh, add user public key to authorized_keys
+	Require: 
+			1)ssh
+			2)add user public key to authorized_keys
 	Steps to test:
 		1) run ssh command: 
 			ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=publickey \
@@ -34,7 +36,10 @@ public key authentication:
 
 host-based authentication:
 	Run ssh command to do the test
-	Require: ssh, turn on HostbasedAuthentication in sshd_config, add host public key to ssh_known_hosts
+	Require: 
+			1)ssh 
+			2)turn on HostbasedAuthentication in sshd_config 
+			3)add host public key to ssh_known_hosts
 	Steps to test:
 		1) run ssh command: 
 			ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=hostbased \
@@ -45,7 +50,10 @@ host-based authentication:
 
 password authentication:
 	Use sshpass tool to do the test 
-	Require: sshpass, ssh, user password stored in the PASSWORDFILE.
+	Require: 
+			1)sshpass
+			2)ssh
+			3)add user password to PASSWORDFILE.
 	Steps to test:
 		1) run sshpass command: 
 			sshpass -f PASSWORDFILE ssh -o StrictHostKeyChecking=no \
