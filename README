@@ -61,3 +61,11 @@ password authentication:
 		2) check the return code: echo $?
 	Expected result:
 		Test ok on return code = 0, otherwise test failed.
+
+-------------------------------------------------------------------------------
+Authentication verified on the server side
+	Check file /var/log/auth.log
+
+	May 13 14:39:09 tim-HP-EliteBook-8740w sshd[4246]: Accepted publickey for tim from ::1 port 50973 ssh2
+	May 13 15:12:51 tim-HP-EliteBook-8740w sshd[4894]: Accepted password for tim from 127.0.0.1 port 36879 ssh2
+	May 13 15:12:54 tim-HP-EliteBook-8740w sshd[4973]: Accepted hostbased for tim from 127.0.0.1 port 42451 ssh2
