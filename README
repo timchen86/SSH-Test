@@ -7,20 +7,17 @@ host-based authentication
 password authentication
 
 -------------------------------------------------------------------------------
-usage: ssh-test.py [-h] -a {0,1,2} USER [HOST]
+usage: ssh-test.py [-h] -a {0,1,2} -u USER -o HOST
 
 SSH authentication test.
-
-positional arguments:
-  USER        the user for public key and password authentication.
-  HOST        the host to perform the SSH test, for host-based authenticaion,
-              the host name must be in FQDN. default: localhost.localdomain
 
 optional arguments:
   -h, --help  show this help message and exit
   -a {0,1,2}  the authentication type, 0: public key, 1: password, 2: host-
               based.
-
+  -u USER     the user for public key and password authentication.
+  -o HOST     the host to perform the SSH test, for host-based authenticaion,
+              the host name must be in FQDN. default: localhost.localdomain
 -------------------------------------------------------------------------------
 Manual test cases:
 

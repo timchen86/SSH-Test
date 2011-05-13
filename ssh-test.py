@@ -137,11 +137,11 @@ def main():
                             choices=range(len(AUTHTYPES)),\
                             help='the authentication type, {0}'.format(h))
 
-	parser.add_argument('user', type=str, metavar='USER', \
+	parser.add_argument('-u', type=str, dest='user', required=True, \
                             help='the user for public key and password authentication.')
 
-	parser.add_argument('host', type=str, metavar='HOST',\
-                            default='localhost.localdomain', nargs='?', \
+	parser.add_argument('-o', type=str, dest='host', required=True, \
+                            default='localhost.localdomain', \
                             help='the host to perform the SSH test, for host-based authenticaion, \
                             the host name must be in FQDN. default: localhost.localdomain')
 
