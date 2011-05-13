@@ -23,7 +23,7 @@ Manual test cases:
 
 public key authentication:
 	Run ssh command to do the test
-	Require: ssh, store user public key in authorized_keys
+	Require: ssh, add user public key to authorized_keys
 	Steps to test:
 		1) run ssh command: 
 			ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=publickey \
@@ -34,7 +34,7 @@ public key authentication:
 
 host-based authentication:
 	Run ssh command to do the test
-	Require: ssh
+	Require: ssh, turn on HostbasedAuthentication in sshd_config, add host public key to ssh_known_hosts
 	Steps to test:
 		1) run ssh command: 
 			ssh -o StrictHostKeyChecking=no -o PreferredAuthentications=hostbased \
