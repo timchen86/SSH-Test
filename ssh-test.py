@@ -68,11 +68,12 @@ def password_auth(user,host):
 		with Watchdog(3):
 			o,r = runproc(ARG)
 	except Watchdog:
-		print('runproc timeout!.')
+		print('runproc() timeout!.')
 		return False
 
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
+		return True
 	else:
 		print('{0} failed, code={1}.'.format(AUTHNAME,r))
 		print('\'man sshpass\' for return code.')
@@ -89,11 +90,12 @@ def publickey_auth(user,host):
 		with Watchdog(3):
 			o,r = runproc(ARG)
 	except Watchdog:
-		print('runproc timeout!.')
+		print('runproc() timeout!.')
 		return False
 
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
+		return True
 	else:
 		print('{0} failed, code={1}.'.format(AUTHNAME,r))
 		return False
@@ -109,11 +111,12 @@ def hostbased_auth(host):
 		with Watchdog(3):
 			o,r = runproc(ARG)
 	except Watchdog:
-		print('runproc timeout!.')
+		print('runproc() timeout!.')
 		return False
 
 	if r == 0:
 		print('{0} successful.'.format(AUTHNAME))
+		return True
 	else:
 		print('{0} failed, code={1}.'.format(AUTHNAME,r))
 		return False
