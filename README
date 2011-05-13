@@ -38,7 +38,7 @@ host-based authentication:
 	Run ssh command to do the test
 	Require: 
 			1)ssh 
-			2)turn on HostbasedAuthentication in sshd_config 
+			2)turn on HostbasedAuthentication in server side sshd_config 
 			3)add host public key to ssh_known_hosts
 	Steps to test:
 		1) run ssh command: 
