@@ -5,6 +5,8 @@ import os
 import sys
 import argparse
 
+# test online editor
+
 # global
 AUTHTYPES = ['public key','password','host-based']
 SSH='/usr/bin/ssh'
